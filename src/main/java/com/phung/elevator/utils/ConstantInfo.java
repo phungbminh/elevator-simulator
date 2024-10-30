@@ -5,7 +5,7 @@ public class ConstantInfo {
     public final static int MaxFloor = 10;
     public final static int ElevatorNum = 1;
     public final static int ElevatorMsPerGrid = 30;
-    public final static int WindowWidth = 1500;
+    public final static int WindowWidth = 500;
     public final static int WindowHeight = 750;
     //floor Buttons
     public final static int floorButtonWidth = 50;

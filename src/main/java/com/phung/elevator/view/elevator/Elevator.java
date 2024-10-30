@@ -19,9 +19,10 @@ public class Elevator extends Thread {
     private ElevatorsController controller;
     private ElevatorView elevatorView;
     JLabel curPos;
-    private int floor = 1;
-    private EleState eLeState = EleState.STALL;// -1 -> down, 0 -> stop, 1 -> up
+    private int curentFloor = 1;
+    private EleState currentElevatorState = EleState.STALL;// -1 -> down, 0 -> stop, 1 -> up
     private ArrayList<Boolean> dests = new ArrayList<Boolean>(Collections.nCopies(ConstantInfo.MaxFloor + 1, Boolean.FALSE));
+
 
     public void setBounds(int x, int y, int width, int height) {
         elevatorView.setBounds(x, y, width, height);
@@ -49,61 +50,121 @@ public class Elevator extends Thread {
     @Override
     public void run() {
         while (true) {
-            if (eLeState == EleState.STALL) {
+            //System.out.println("floor: " + floor);
+            if (currentElevatorState == EleState.STALL) {
                 try {
+                    //System.out.println("eLeState: " + eLeState);
                     sleep(1000);
                 } catch (InterruptedException e) {
                     System.out.println("Cant not sleep in run!");
                 }
                 continue;
             }
-            moveOneFloor(eLeState == EleState.UP);
+            moveOneFloor(currentElevatorState == EleState.UP);
         }
     }
 
-    synchronized void moveOneFloor(boolean up) {
+    void sliding (boolean up){
         int distance = ConstantInfo.floorButtonHeight + ConstantInfo.floorButtonSpace;
-
         for (int i = 0; i < distance; i++) {
             try {
                 sleep(ConstantInfo.ElevatorMsPerGrid);
-            } catch (InterruptedException e) {
-            }
+            } catch (InterruptedException e) {}
             curPos.setLocation(curPos.getLocation().x, curPos.getLocation().y + (up ? -1 : 1));
         }
-        //Tầng++--
-        floor += (up ? 1 : -1);
-        //Nếu ở tầng mục tiêu
-        if (dests.get(floor)) {
-            dests.set(floor, Boolean.FALSE);
-            //Tắt đèn
-            turnoffLight(floor);
-            //Bạn có cần tiếp tục đi lên/xuống không?
-            int limit = eLeState == EleState.UP ? (ConstantInfo.MaxFloor + 1) : 0;
-            int step = eLeState == EleState.UP ? 1 : -1;
-            boolean needToContinue = search(limit, step);
+    }
+    synchronized void moveOneFloor(boolean up) {
+        sliding(up);
+        // Cập nhật tầng hiện tại
+        curentFloor += (up ? 1 : -1);
 
-            //Không cần tiếp tục, kiểm tra ngược xem có task hay không
+        if (dests.get(curentFloor)) { // Nếu đến tầng có yêu cầu
+            //kiem tra con task nao o tren khong
+
+            dests.set(curentFloor, Boolean.FALSE);
+
+            turnoffLight(curentFloor);
+            // Kiểm tra xem còn công việc nào cùng hướng yêu cầu không
+            boolean needToContinue = checkForRemainingTasksSameDirection();
+
+            // Nếu không có công việc nào, kiểm tra ngược lại
             if (!needToContinue) {
-                needToContinue = search(ConstantInfo.MaxFloor + 1 - limit, -step);//Đảo ngược -=-
+                int limit = (currentElevatorState == EleState.UP ? (ConstantInfo.MaxFloor + 1) : 0);
+                needToContinue = search(limit, (currentElevatorState == EleState.UP ? 1 : -1)); // Kiểm tra ngược
                 if (!needToContinue) {
-                    eLeState = EleState.STALL;
+                    currentElevatorState = EleState.STALL; // Không có công việc nào, dừng thôi
                 } else {
-                    assert eLeState != EleState.STALL;
-                    eLeState = (eLeState == EleState.UP ? EleState.DOWN : EleState.UP);
+                    currentElevatorState = (currentElevatorState == EleState.UP ? EleState.DOWN : EleState.UP);
                 }
             }
-            EleState oldState = eLeState;
-            eLeState = EleState.PAUSE;
-            openDoorThenClose();
-            eLeState = oldState;
+
+            EleState oldState = currentElevatorState;
+            currentElevatorState = EleState.PAUSE;
+            openDoorThenClose(); // Mở cửa
+            currentElevatorState = oldState; // Trở lại trạng thái cũ
         }
+    }
+    //    synchronized void moveOneFloor(boolean up) {
+//        int distance = ConstantInfo.floorButtonHeight + ConstantInfo.floorButtonSpace;
+//        for (int i = 0; i < distance; i++) {
+//            try {
+//                sleep(ConstantInfo.ElevatorMsPerGrid);
+//            } catch (InterruptedException e) {}
+//            //System.out.println("elevator position: x=" + curPos.getLocation().x + "; y=" + curPos.getLocation().y + (up ? -1 : 1));
+//            curPos.setLocation(curPos.getLocation().x, curPos.getLocation().y + (up ? -1 : 1));
+//        }
+//        //Tầng++--
+//        curentFloor += (up ? 1 : -1);
+//        //Nếu ở tầng mục tiêu
+//        for (int i = 1; i < dests.size(); i++) { // Bắt đầu từ 1 nếu tầng 0 không được sử dụng
+//            System.out.print(i + ":" + (dests.get(i) ? "True" : "False") + " , ");
+//        }
+//        System.out.println("");
+//
+//        if (dests.get(curentFloor)) {
+//            //if(!checkForRemainingTasksSameDirection()){
+//            dests.set(curentFloor, Boolean.FALSE);
+//            //Tắt đèn
+//            turnoffLight(curentFloor);
+//            //Bạn có cần tiếp tục đi lên/xuống không?
+//            int limit = (eLeState == EleState.UP ? (ConstantInfo.MaxFloor + 1) : 0);
+//            int step = eLeState == EleState.UP ? 1 : -1;
+//            boolean needToContinue = search(limit, step);
+//
+//            //Không cần tiếp tục, kiểm tra ngược xem có task hay không
+//            if (!needToContinue) {
+//                needToContinue = search(ConstantInfo.MaxFloor + 1 - limit, -step);//Đảo ngược -=-
+//                if (!needToContinue) {
+//                    eLeState = EleState.STALL;
+//                } else {
+//                    assert eLeState != EleState.STALL;
+//                    eLeState = (eLeState == EleState.UP ? EleState.DOWN : EleState.UP);
+//                }
+//            }
+//            EleState oldState = eLeState;
+//            eLeState = EleState.PAUSE;
+//            openDoorThenClose();
+//            eLeState = oldState;
+//        }
+//
+//    }
+   // }
+    // Kiểm tra xem còn công việc nào yêu cầu cùng một hướng không
+    private boolean checkForRemainingTasksSameDirection() {
+        int limit = (currentElevatorState == EleState.UP ? ConstantInfo.MaxFloor + 1 : 0);
+        int step = (currentElevatorState == EleState.UP ? 1 : -1);
+        for (int i = curentFloor + step; (currentElevatorState == currentElevatorState.UP ? i < limit : i > limit); i += step) {
+            if (dests.get(i)) {
+                return true; // Còn công việc yêu cầu ở trên đường đi
+            }
+        }
+        return false;
     }
 
     //Kiểm tra xem có công việc theo một hướng nhất định không--
     private boolean search(int limit, int step) {
         boolean needToContinue = false;
-        for (int i = floor; i != limit; i += step) {
+        for (int i = curentFloor; i != limit; i += step) {
             if (dests.get(i)) {
                 needToContinue = true;
                 break;
@@ -111,18 +172,34 @@ public class Elevator extends Thread {
         }
         return needToContinue;
     }
+    // Phương thức tìm kiếm để xác định tầng ưu tiên cao nhất
+//    private boolean search(int limit, int step) {
+//        boolean needToContinue = false;
+//        int priorityFloor = -1; // Biến để theo dõi tầng ưu tiên cao nhất
+//        for (int i = curentFloor; i != limit; i += step) {
+//            if (dests.get(i)) {
+//                priorityFloor = i; // Cập nhật tầng ưu tiên
+//            }
+//        }
+//        if (priorityFloor != -1) {
+//            // Di chuyển trực tiếp đến tầng ưu tiên cao nhất
+//            curentFloor = priorityFloor;
+//            needToContinue = true;
+//        }
+//        return needToContinue;
+//    }
 
     //mở và đóng cửa
     private void openDoorThenClose() {
-        if (eLeState != EleState.STALL && eLeState != EleState.PAUSE) return;
+        if (currentElevatorState != EleState.STALL && currentElevatorState != EleState.PAUSE) return;
         openDoor();
         try {
-            sleep(1000);
+            sleep(300);
         } catch (InterruptedException e) {
         }
         closeDoor();
         try {
-            sleep(1000);
+            sleep(300);
         } catch (InterruptedException e) {
         }
     }
@@ -136,7 +213,7 @@ public class Elevator extends Thread {
     }
 
     private void alert() {
-        Thread thread = new Thread(() -> {
+        Thread thread = new Thread(()-> {
             while (true) {
                 curPos.setBackground(Color.RED);
                 try {
@@ -160,20 +237,21 @@ public class Elevator extends Thread {
     }
 
     void commitTask(int requiredFloor) {
-        //Nếu thang máy đang trong tình cho thi acctive
-        if (EleState.STALL == eLeState) {
-            if (floor == requiredFloor) {
-                turnoffLight(floor);
+        //Nếu thang máy đang trong tình trạng dừng
+        if (EleState.STALL == currentElevatorState) {
+            if (curentFloor == requiredFloor) {
+                turnoffLight(curentFloor);
                 return;
             }
-            eLeState = (floor < requiredFloor ? EleState.UP : EleState.DOWN);
+            currentElevatorState = (curentFloor < requiredFloor ? EleState.UP : EleState.DOWN);
         }
+        System.out.println("commitTask: eLeState -> " + currentElevatorState + "; requiredFloor: " + requiredFloor);
         dests.set(requiredFloor, Boolean.TRUE);
+
+
     }
-
-
     public void commitOuterTask(int requiredFloor, EleState dir) {
-        int index = dir == EleState.UP ? 1 : 0;
+        int index = (dir == EleState.UP ? 1 : 0);
         taskState[requiredFloor][index] = true;
         commitTask(requiredFloor);
     }

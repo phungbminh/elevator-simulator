@@ -12,7 +12,7 @@ public class MainView extends JFrame {
     public MainView() {
         super();
         //init
-        setSize(1500, 750);
+        setSize(ConstantInfo.WindowWidth,  ConstantInfo.WindowHeight);
         System.out.println(ConstantInfo.ElevatorNum);
         System.out.println(ConstantInfo.MaxFloor);
 

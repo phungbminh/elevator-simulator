@@ -51,7 +51,7 @@ public class Floors extends JPanel {
     };
 
     public void turnoffLight(int floor, int up) {
-        System.out.println("Turn off" + ((1 - up) + 2 * (floor - 1)));
+        System.out.println("Turn off: " + ((1 - up) + 2 * (floor - 1)));
         buttons[(ConstantInfo.MaxFloor - floor) * 2 + (1 - up)].turnoff();
     }
 }
