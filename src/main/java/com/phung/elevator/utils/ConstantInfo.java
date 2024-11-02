@@ -2,8 +2,8 @@ package com.phung.elevator.utils;
 
 
 public class ConstantInfo {
-    public final static int MaxFloor = 10;
-    public final static int ElevatorNum = 3;
+    public final static int MaxFloor = 13;
+    public final static int ElevatorNum = 1;
     public final static int ElevatorMsPerGrid = 30;
     public final static int WindowWidth = 800;
     public final static int WindowHeight = 750;

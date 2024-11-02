@@ -17,7 +17,7 @@ public class FloorFLags {
                     (ConstantInfo.MaxFloor - 1 - i) * (ConstantInfo.floorButtonSpace + ConstantInfo.floorButtonHeight),
                     ConstantInfo.floorButtonWidth, ConstantInfo.floorButtonHeight
             );
-            floorFlags[i].setBackground(Color.green);
+            floorFlags[i].setBackground(Color.orange);
             floorFlags[i].setOpaque(true);
             parent.add(floorFlags[i]);
         }
