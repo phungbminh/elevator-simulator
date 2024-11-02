@@ -11,17 +11,16 @@ import java.awt.*;
 public class MainView extends JFrame {
     public MainView() {
         super();
+        int elevatorWidth = ConstantInfo.innerTotalButtonx + ConstantInfo.elevatorSpace;
         //init
-        setSize(ConstantInfo.WindowWidth,  ConstantInfo.WindowHeight);
-        System.out.println(ConstantInfo.ElevatorNum);
-        System.out.println(ConstantInfo.MaxFloor);
+        setSize(300 + (elevatorWidth * ConstantInfo.ElevatorNum),  ConstantInfo.WindowHeight);
 
         Elevator[] elevators = new Elevator[ConstantInfo.ElevatorNum];
         for (int i = 0; i < ConstantInfo.ElevatorNum; i++) {
             elevators[i] = new Elevator(ConstantInfo.WindowHeight - ConstantInfo.innerTotalButtony, this);
             elevators[i].setBounds(ConstantInfo.elevatorStart + i * (ConstantInfo.innerTotalButtonx + ConstantInfo.elevatorSpace),
                     0,
-                    ConstantInfo.innerTotalButtonx + ConstantInfo.elevatorSpace, ConstantInfo.WindowHeight);
+                    elevatorWidth, ConstantInfo.WindowHeight);
             elevators[i].start();
         }
 

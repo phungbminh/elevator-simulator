@@ -3,12 +3,12 @@ package com.phung.elevator.utils;
 
 public class ConstantInfo {
     public final static int MaxFloor = 10;
-    public final static int ElevatorNum = 1;
+    public final static int ElevatorNum = 3;
     public final static int ElevatorMsPerGrid = 30;
-    public final static int WindowWidth = 500;
+    public final static int WindowWidth = 800;
     public final static int WindowHeight = 750;
     //floor Buttons
-    public final static int floorButtonWidth = 50;
+    public final static int floorButtonWidth = 60;
     public final static int floorButtonHeight = 25;
     public final static int floorButtonSpace = 10;
     public final static int floorFlagStart = 5;

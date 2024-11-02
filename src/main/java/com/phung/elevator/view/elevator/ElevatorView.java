@@ -12,8 +12,8 @@ public class ElevatorView extends JPanel {
     ArrayList<InnerNumButton> innerButtons = new ArrayList<>();
     private JLabel[] floorFlags = new JLabel[20];
     JLabel curPos;
-    private static final int othersNum = 3;
-    private static final String[] others = {"><", "<>", "🔔", };
+    private static final int othersNum = 4;
+    private static final String[] others = {"_ 1", "><", "<>", "🔔", };
 
     public ElevatorView(int buttonStarty) {
         super();
@@ -65,7 +65,7 @@ public class ElevatorView extends JPanel {
             ref.setForeground(Color.DARK_GRAY);
             ref.addActionListener(null);
         }
-        curPos = new JLabel("=||=");
+        curPos = new JLabel("|==||==|");
         curPos.setBackground(Color.GRAY);
         curPos.setOpaque(true);
 
